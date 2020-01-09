@@ -1,7 +1,7 @@
 Summary: Network monitoring tools including ping
 Name: iputils
 Version: 20071127
-Release: 17%{?dist}.2
+Release: 17%{?dist}
 License: BSD with advertising and GPLv2+ and Rdisc
 URL: http://www.skbuff.net/iputils
 Group: System Environment/Daemons
@@ -33,7 +33,6 @@ Patch19: iputils-20071127-ping_flags.patch
 Patch20: iputils-20071127-resolve.patch
 Patch21: iputils-20071127-rdisc_alias.patch
 Patch22: iputils-20071127-broadcast.patch
-Patch23: iputils-20071127-monotonic-clock.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: docbook-utils perl-SGMLSpm
@@ -76,7 +75,6 @@ the target machine is alive and receiving network traffic.
 %patch20 -p1 -b .resolve
 %patch21 -p1 -b .rdisc_alias
 %patch22 -p1 -b .broadcast
-%patch23 -p1 -b .monotonic-clock
 
 %build
 %ifarch s390 s390x
@@ -166,12 +164,6 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_sysconfdir}/rc.d/init.d/rdisc
 
 %changelog
-* Tue Sep 17 2013 Jan Synáček <jsynacek@redhat.com> - 20071127-17.2
-- Resolves: #998827 - arping hangs when time is stepped backwards (REFIX)
-
-* Tue Aug 20 2013 Jan Synáček <jsynacek@redhat.com> - 20071127-17.1
-- Resolves: #998827 - arping hangs when time is stepped backwards
-
 * Mon May 27 2013 Jan Synáček <jsynacek@redhat.com> - 20071127-17
 - Resolves: #963927 - arping is not compatible with network namespaces
 
