@@ -1,7 +1,7 @@
 Summary: Network monitoring tools including ping
 Name: iputils
 Version: 20071127
-Release: 20%{?dist}
+Release: 21%{?dist}
 License: BSD with advertising and GPLv2+ and Rdisc
 URL: http://www.skbuff.net/iputils
 Group: System Environment/Daemons
@@ -38,6 +38,7 @@ Patch24: iputils-20071127-remove-old-kernel-warning.patch
 Patch25: iputils-20071127-arping-fix-exit-conditions.patch
 Patch26: iputils-20071127-tracepath-back-count.patch
 Patch27: iputils-20071127-ping-wrong-inet6-host.patch
+Patch28: iputils-20071127-ping6-segfault.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: docbook-utils perl-SGMLSpm
@@ -85,6 +86,7 @@ the target machine is alive and receiving network traffic.
 %patch25 -p1 -b .arping-exit-conditions
 %patch26 -p1 -b .tracepath-back-count
 %patch27 -p1 -b .wrong-inet6-host
+%patch28 -p1 -b .ping6-segfault
 
 %build
 %ifarch s390 s390x
@@ -174,6 +176,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_sysconfdir}/rc.d/init.d/rdisc
 
 %changelog
+* Fri Nov 13 2015 Jan Synáček <jsynacek@redhat.com> - 20071127-21
+- Resolves: #1010296 - ping6 - SEGFAULT
+
 * Tue Nov 18 2014 Jan Synáček <jsynacek@redhat.com> - 20071127-20
 - Resolves: #1149574 - Ping produces "WARNING: kernel is not very fresh, upgrade is recommended."
 - Resolves: #829998 - The arping command may have return value of 0.
