@@ -1,7 +1,7 @@
 Summary: Network monitoring tools including ping
 Name: iputils
 Version: 20071127
-Release: 21%{?dist}
+Release: 24%{?dist}
 License: BSD with advertising and GPLv2+ and Rdisc
 URL: http://www.skbuff.net/iputils
 Group: System Environment/Daemons
@@ -39,6 +39,9 @@ Patch25: iputils-20071127-arping-fix-exit-conditions.patch
 Patch26: iputils-20071127-tracepath-back-count.patch
 Patch27: iputils-20071127-ping-wrong-inet6-host.patch
 Patch28: iputils-20071127-ping6-segfault.patch
+Patch29: iputils-20071127-arping-doc.patch
+Patch30: iputils-20071127-sigalrm-unblock.patch
+Patch31: iputils-20071127-ping-eacces.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: docbook-utils perl-SGMLSpm
@@ -87,6 +90,9 @@ the target machine is alive and receiving network traffic.
 %patch26 -p1 -b .tracepath-back-count
 %patch27 -p1 -b .wrong-inet6-host
 %patch28 -p1 -b .ping6-segfault
+%patch29 -p1 -b .arping-doc
+%patch30 -p1 -b .sigalrm-unblock
+%patch31 -p1 -b .ping-eacces
 
 %build
 %ifarch s390 s390x
@@ -176,6 +182,17 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_sysconfdir}/rc.d/init.d/rdisc
 
 %changelog
+* Wed Dec  7 2016 Jan Synáček <jsynacek@redhat.com> - 20071127-24
+- Related: #1334775 - backport upstream ping change unmasking signals
+
+* Mon Nov  7 2016 Jan Synáček <jsynacek@redhat.com> - 20071127-23
+- Related: #1351720 - documentation inconsistency on arping
+
+* Mon Sep 12 2016 Jan Synáček <jsynacek@redhat.com> - 20071127-22
+- Resolves: #1351720 - documentation inconsistency on arping
+- Resolves: #1334775 - backport upstream ping change unmasking signals
+- Resolves: #1298344 - Ping assumes EACCESS errors are due to broadcast addresses
+
 * Fri Nov 13 2015 Jan Synáček <jsynacek@redhat.com> - 20071127-21
 - Resolves: #1010296 - ping6 - SEGFAULT
 
