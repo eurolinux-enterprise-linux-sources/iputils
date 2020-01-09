@@ -1,7 +1,7 @@
 Summary: Network monitoring tools including ping
 Name: iputils
 Version: 20071127
-Release: 17%{?dist}
+Release: 20%{?dist}
 License: BSD with advertising and GPLv2+ and Rdisc
 URL: http://www.skbuff.net/iputils
 Group: System Environment/Daemons
@@ -33,6 +33,11 @@ Patch19: iputils-20071127-ping_flags.patch
 Patch20: iputils-20071127-resolve.patch
 Patch21: iputils-20071127-rdisc_alias.patch
 Patch22: iputils-20071127-broadcast.patch
+Patch23: iputils-20071127-monotonic-clock.patch
+Patch24: iputils-20071127-remove-old-kernel-warning.patch
+Patch25: iputils-20071127-arping-fix-exit-conditions.patch
+Patch26: iputils-20071127-tracepath-back-count.patch
+Patch27: iputils-20071127-ping-wrong-inet6-host.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: docbook-utils perl-SGMLSpm
@@ -75,6 +80,11 @@ the target machine is alive and receiving network traffic.
 %patch20 -p1 -b .resolve
 %patch21 -p1 -b .rdisc_alias
 %patch22 -p1 -b .broadcast
+%patch23 -p1 -b .monotonic-clock
+%patch24 -p1 -b .kernel-warning
+%patch25 -p1 -b .arping-exit-conditions
+%patch26 -p1 -b .tracepath-back-count
+%patch27 -p1 -b .wrong-inet6-host
 
 %build
 %ifarch s390 s390x
@@ -164,6 +174,18 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_sysconfdir}/rc.d/init.d/rdisc
 
 %changelog
+* Tue Nov 18 2014 Jan Synáček <jsynacek@redhat.com> - 20071127-20
+- Resolves: #1149574 - Ping produces "WARNING: kernel is not very fresh, upgrade is recommended."
+- Resolves: #829998 - The arping command may have return value of 0.
+- Resolves: #1099426 - Count of "back" is not correct in tracepath
+- Resolves: #1113082 - ping returns odd results with options inet6 in resolv.conf
+
+* Tue Sep 17 2013 Jan Synáček <jsynacek@redhat.com> - 20071127-19
+- Resolves: #960570 - arping hangs when time is stepped backwards (REFIX)
+
+* Tue Jul  9 2013 Jan Synáček <jsynacek@redhat.com> - 20071127-18
+- Resolves: #960570 - arping hangs when time is stepped backwards
+
 * Mon May 27 2013 Jan Synáček <jsynacek@redhat.com> - 20071127-17
 - Resolves: #963927 - arping is not compatible with network namespaces
 
@@ -309,7 +331,7 @@ rm -rf ${RPM_BUILD_ROOT}
 * Fri Dec 09 2005 Jesse Keating <jkeating@redhat.com>
 - rebuilt
 
-* Mon Dec 02 2005 Radek Vokal <rvokal@redhat.com> 20020927-31
+* Mon Dec 05 2005 Radek Vokal <rvokal@redhat.com> 20020927-31
 - ifenslave.8 from debian.org
 - separate ifenslave to its own tarball
 
@@ -439,7 +461,7 @@ rm -rf ${RPM_BUILD_ROOT}
 * Mon Aug 27 2001 Philipp Knirsch <pknirsch@redhat.de> 20001110-6
 - Fixed buffer overflow problem in traceroute6.c (#51135)
 
-* Mon Jul 01 2001 Philipp Knirsch <pknirsch@redhat.de>
+* Mon Jul 02 2001 Philipp Knirsch <pknirsch@redhat.de>
 - Made ping6 and traceroute6 setuid (safe as they drop it VERY early) (#46769)
 
 * Thu Jun 28 2001 Philipp Knirsch <pknirsch@redhat.de>
