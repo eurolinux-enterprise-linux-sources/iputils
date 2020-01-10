@@ -3,7 +3,7 @@
 Summary: Network monitoring tools including ping
 Name: iputils
 Version: 20160308
-Release: 10%{?dist}
+Release: 8%{?dist}
 # some parts are under the original BSD (ping.c)
 # some are under GPLv2+ (tracepath.c)
 License: BSD and GPLv2+
@@ -26,13 +26,6 @@ Patch5: iputils-reorder-I-parsing.patch
 Patch6: iputils-fix-I-setsockopt.patch
 Patch7: iputils-ping-hang.patch
 Patch8: iputils-arping-doc.patch
-Patch9: iputils-fix-ping6-return-value.patch
-Patch10: iputils-bind-I-interface.patch
-Patch11: iputils-fix-possible-double-free.patch
-Patch12: iputils-ping-eacces.patch
-Patch13: iputils-fix-ping-t-multicast.patch
-Patch14: iputils-arping-network-down.patch
-Patch15: iputils-fix-pmtu.patch
 
 BuildRequires: docbook-utils perl-SGMLSpm
 BuildRequires: glibc-kernheaders >= 2.4-8.19
@@ -89,13 +82,6 @@ Queries.
 %patch6 -p1
 %patch7 -p1
 %patch8 -p1
-%patch9 -p1
-%patch10 -p1
-%patch11 -p1
-%patch12 -p1
-%patch13 -p1
-%patch14 -p1
-%patch15 -p1
 
 %build
 %ifarch s390 s390x
@@ -203,17 +189,6 @@ mv -f RELNOTES.tmp RELNOTES
 %attr(644,root,root) %{_mandir}/man8/ninfod.8.gz
 
 %changelog
-* Mon May 22 2017 Jan Synáček <jsynacek@redhat.com> - 20160308-10
-- fix pmtu discovery for ipv6 (#1444281)
-
-* Tue Feb 21 2017 Jan Synáček <jsynacek@redhat.com> - 20160308-9
-- IPv4 vs IPv6 inconsistency on return value of ping (#1362388)
-- ping6 does not use device specified with -I parameter (#1371824, #1424965)
-- double cap_free call in ping_common.c (#1410114)
-- ping assumes EACCESS errors are due to broadcast addresses (#1387315)
-- ping -t with multicast address without effect on ppc64 (#1373333)
-- arping -c <n> does not exit when the device is deleted (#1387542)
-
 * Mon Sep  5 2016 Jan Synáček <jsynacek@redhat.com> - 20160308-8
 - arping documentation inconsistency (#1351704)
 
