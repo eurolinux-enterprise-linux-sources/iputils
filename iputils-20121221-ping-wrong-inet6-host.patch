@@ -1,0 +1,27 @@
+diff -rup iputils-s20121221/ping.c iputils-s20121221-new/ping.c
+--- iputils-s20121221/ping.c	2012-12-21 15:01:07.000000000 +0100
++++ iputils-s20121221-new/ping.c	2015-04-29 13:40:42.978415476 +0200
+@@ -279,7 +279,7 @@ main(int argc, char **argv)
+ #else
+ 			idn = target;
+ #endif
+-			hp = gethostbyname(idn);
++			hp = gethostbyname2(idn, AF_INET);
+ 			if (!hp) {
+ 				fprintf(stderr, "ping: unknown host %s\n", target);
+ 				exit(2);
+diff -rup iputils-s20121221/tracepath.c iputils-s20121221-new/tracepath.c
+--- iputils-s20121221/tracepath.c	2012-12-21 15:01:07.000000000 +0100
++++ iputils-s20121221-new/tracepath.c	2015-04-29 13:41:09.506353342 +0200
+@@ -370,9 +370,9 @@ main(int argc, char **argv)
+ 	}
+ #endif
+ 
+-	he = gethostbyname(p);
++	he = gethostbyname2(p, AF_INET);
+ 	if (he == NULL) {
+-		herror("gethostbyname");
++		herror("gethostbyname2");
+ 		exit(1);
+ 	}
+ 
