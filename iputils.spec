@@ -2,27 +2,37 @@
 
 Summary: Network monitoring tools including ping
 Name: iputils
-Version: 20121221
-Release: 7%{?dist}
+Version: 20160308
+Release: 10%{?dist}
 # some parts are under the original BSD (ping.c)
 # some are under GPLv2+ (tracepath.c)
 License: BSD and GPLv2+
-URL: http://www.skbuff.net/iputils
+URL: https://github.com/iputils/iputils
 Group: System Environment/Daemons
 
-Source0: http://www.skbuff.net/iputils/%{name}-s%{version}.tar.bz2
+Source0: https://github.com/iputils/iputils/archive/s%{version}.tar.gz#/%{name}-s%{version}.tar.gz
 Source1: ifenslave.tar.gz
 Source3: rdisc.initd
 Source4: rdisc.service
 Source5: rdisc.sysconfig
 Source6: ninfod.service
 
-Patch0: iputils-20020927-rh.patch
+Patch0: iputils-rh.patch
 Patch1: iputils-ifenslave.patch
-Patch2: iputils-20121221-floodlocale.patch
-Patch3: iputils-20121221-caps.patch
-Patch4: iputils-20121221-ping-wrong-inet6-host.patch
-Patch5: iputils-20121221-tracepath-back-count.patch
+Patch2: iputils-20121221-caps.patch
+Patch3: iputils-rh-ping-ipv4-by-default.patch
+Patch4: iputils-oversized-packets.patch
+Patch5: iputils-reorder-I-parsing.patch
+Patch6: iputils-fix-I-setsockopt.patch
+Patch7: iputils-ping-hang.patch
+Patch8: iputils-arping-doc.patch
+Patch9: iputils-fix-ping6-return-value.patch
+Patch10: iputils-bind-I-interface.patch
+Patch11: iputils-fix-possible-double-free.patch
+Patch12: iputils-ping-eacces.patch
+Patch13: iputils-fix-ping-t-multicast.patch
+Patch14: iputils-arping-network-down.patch
+Patch15: iputils-fix-pmtu.patch
 
 BuildRequires: docbook-utils perl-SGMLSpm
 BuildRequires: glibc-kernheaders >= 2.4-8.19
@@ -70,12 +80,22 @@ Queries.
 %prep
 %setup -q -a 1 -n %{name}-s%{version}
 
-%patch0 -p1 -b .rh
-%patch1 -p1 -b .addr
-%patch2 -p1 -b .floc
-%patch3 -p1 -b .caps
-%patch4 -p1 -b .wrong-inet6-host
-%patch5 -p1 -b .tracepath-back-count
+%patch0 -p1
+%patch1 -p1
+%patch2 -p1
+%patch3 -p1
+%patch4 -p1
+%patch5 -p1
+%patch6 -p1
+%patch7 -p1
+%patch8 -p1
+%patch9 -p1
+%patch10 -p1
+%patch11 -p1
+%patch12 -p1
+%patch13 -p1
+%patch14 -p1
+%patch15 -p1
 
 %build
 %ifarch s390 s390x
@@ -85,7 +105,7 @@ Queries.
 %endif
 export LDFLAGS="-pie -Wl,-z,relro,-z,now"
 
-make %{?_smp_mflags} arping clockdiff ping ping6 rdisc tracepath tracepath6 \
+make %{?_smp_mflags} arping clockdiff ping rdisc tracepath tracepath6 \
                      ninfod
 gcc -Wall $RPM_OPT_FLAGS ifenslave.c -o ifenslave
 make -C doc man
@@ -101,13 +121,13 @@ install -cp arping		${RPM_BUILD_ROOT}%{_sbindir}/
 install -cp ping		${RPM_BUILD_ROOT}%{_bindir}/
 install -cp ifenslave		${RPM_BUILD_ROOT}%{_sbindir}/
 install -cp rdisc		${RPM_BUILD_ROOT}%{_sbindir}/
-install -cp ping6		${RPM_BUILD_ROOT}%{_bindir}/
 install -cp tracepath		${RPM_BUILD_ROOT}%{_bindir}/
 install -cp tracepath6		${RPM_BUILD_ROOT}%{_bindir}/
 install -cp ninfod/ninfod	${RPM_BUILD_ROOT}%{_sbindir}/
 
 mkdir -p ${RPM_BUILD_ROOT}%{_bindir}
-ln -sf ../bin/ping6 ${RPM_BUILD_ROOT}%{_sbindir}
+ln -sf ping ${RPM_BUILD_ROOT}%{_bindir}/ping6
+ln -sf ../bin/ping ${RPM_BUILD_ROOT}%{_sbindir}/ping6
 ln -sf ../bin/tracepath ${RPM_BUILD_ROOT}%{_sbindir}
 ln -sf ../bin/tracepath6 ${RPM_BUILD_ROOT}%{_sbindir}
 
@@ -158,9 +178,9 @@ mv -f RELNOTES.tmp RELNOTES
 %attr(0755,root,root) %caps(cap_net_raw=p cap_net_admin=p) %{_bindir}/ping
 %{_sbindir}/ifenslave
 %{_sbindir}/rdisc
-%attr(0755,root,root) %caps(cap_net_raw=p cap_net_admin=p) %{_bindir}/ping6
 %{_bindir}/tracepath
 %{_bindir}/tracepath6
+%{_bindir}/ping6
 %{_sbindir}/ping6
 %{_sbindir}/tracepath
 %{_sbindir}/tracepath6
@@ -183,6 +203,45 @@ mv -f RELNOTES.tmp RELNOTES
 %attr(644,root,root) %{_mandir}/man8/ninfod.8.gz
 
 %changelog
+* Mon May 22 2017 Jan Synáček <jsynacek@redhat.com> - 20160308-10
+- fix pmtu discovery for ipv6 (#1444281)
+
+* Tue Feb 21 2017 Jan Synáček <jsynacek@redhat.com> - 20160308-9
+- IPv4 vs IPv6 inconsistency on return value of ping (#1362388)
+- ping6 does not use device specified with -I parameter (#1371824, #1424965)
+- double cap_free call in ping_common.c (#1410114)
+- ping assumes EACCESS errors are due to broadcast addresses (#1387315)
+- ping -t with multicast address without effect on ppc64 (#1373333)
+- arping -c <n> does not exit when the device is deleted (#1387542)
+
+* Mon Sep  5 2016 Jan Synáček <jsynacek@redhat.com> - 20160308-8
+- arping documentation inconsistency (#1351704)
+
+* Mon Aug 29 2016 Jan Synáček <jsynacek@redhat.com> - 20160308-7
+- ping hung when it cannot receive echo reply (#1362463)
+- arping documentation inconsistency (#1351704)
+
+* Fri Jul 29 2016 Jan Synáček <jsynacek@redhat.com> - 20160308-6
+- ping does not use device specified with -I parameter (#1351540)
+
+* Tue Jul 12 2016 Jan Synáček <jsynacek@redhat.com> - 20160308-5
+- add missing /bin/ping6 (#1355674)
+
+* Fri Jun  3 2016 Jan Synáček <jsynacek@redhat.com> - 20160308-4
+- reorder -I option parsing (#1337598)
+
+* Wed May 11 2016 Jan Synáček <jsynacek@redhat.com> - 20160308-3
+- inconsistent ping behaviour and hang with too large packet size (#1172084)
+
+* Tue Mar 29 2016 Jan Synáček <jsynacek@redhat.com> - 20160308-2
+- ping IPv4 addresses by default when given a name (#1317796)
+
+* Mon Mar 14 2016 Jan Synáček <jsynacek@redhat.com> - 20160308-1
+- Update to iputils-s20160308 (#1273336)
+
+* Tue Mar  1 2016 Jan Synáček <jsynacek@redhat.com> - 20150815-1
+- Update to iputils-s20150815 (#1273336)
+
 * Wed Apr 29 2015 Jan Synáček <jsynacek@redhat.com> - 20121221-7
 - ping returns odd results with options inet6 in resolv.conf (#1210331)
 - count of "back" is not correct in tracepath (#1208372)
