@@ -2,30 +2,24 @@
 
 Summary: Network monitoring tools including ping
 Name: iputils
-Version: 20160308
-Release: 8%{?dist}
+Version: 20121221
+Release: 6%{?dist}
 # some parts are under the original BSD (ping.c)
 # some are under GPLv2+ (tracepath.c)
 License: BSD and GPLv2+
-URL: https://github.com/iputils/iputils
+URL: http://www.skbuff.net/iputils
 Group: System Environment/Daemons
 
-Source0: https://github.com/iputils/iputils/archive/s%{version}.tar.gz#/%{name}-s%{version}.tar.gz
+Source0: http://www.skbuff.net/iputils/%{name}-s%{version}.tar.bz2
 Source1: ifenslave.tar.gz
 Source3: rdisc.initd
 Source4: rdisc.service
 Source5: rdisc.sysconfig
 Source6: ninfod.service
 
-Patch0: iputils-rh.patch
+Patch0: iputils-20020927-rh.patch
 Patch1: iputils-ifenslave.patch
-Patch2: iputils-20121221-caps.patch
-Patch3: iputils-rh-ping-ipv4-by-default.patch
-Patch4: iputils-oversized-packets.patch
-Patch5: iputils-reorder-I-parsing.patch
-Patch6: iputils-fix-I-setsockopt.patch
-Patch7: iputils-ping-hang.patch
-Patch8: iputils-arping-doc.patch
+Patch2: iputils-20121221-floodlocale.patch
 
 BuildRequires: docbook-utils perl-SGMLSpm
 BuildRequires: glibc-kernheaders >= 2.4-8.19
@@ -73,15 +67,9 @@ Queries.
 %prep
 %setup -q -a 1 -n %{name}-s%{version}
 
-%patch0 -p1
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
-%patch7 -p1
-%patch8 -p1
+%patch0 -p1 -b .rh
+%patch1 -p1 -b .addr
+%patch2 -p1 -b .floc
 
 %build
 %ifarch s390 s390x
@@ -91,7 +79,7 @@ Queries.
 %endif
 export LDFLAGS="-pie -Wl,-z,relro,-z,now"
 
-make %{?_smp_mflags} arping clockdiff ping rdisc tracepath tracepath6 \
+make %{?_smp_mflags} arping clockdiff ping ping6 rdisc tracepath tracepath6 \
                      ninfod
 gcc -Wall $RPM_OPT_FLAGS ifenslave.c -o ifenslave
 make -C doc man
@@ -107,13 +95,13 @@ install -cp arping		${RPM_BUILD_ROOT}%{_sbindir}/
 install -cp ping		${RPM_BUILD_ROOT}%{_bindir}/
 install -cp ifenslave		${RPM_BUILD_ROOT}%{_sbindir}/
 install -cp rdisc		${RPM_BUILD_ROOT}%{_sbindir}/
+install -cp ping6		${RPM_BUILD_ROOT}%{_bindir}/
 install -cp tracepath		${RPM_BUILD_ROOT}%{_bindir}/
 install -cp tracepath6		${RPM_BUILD_ROOT}%{_bindir}/
 install -cp ninfod/ninfod	${RPM_BUILD_ROOT}%{_sbindir}/
 
 mkdir -p ${RPM_BUILD_ROOT}%{_bindir}
-ln -sf ping ${RPM_BUILD_ROOT}%{_bindir}/ping6
-ln -sf ../bin/ping ${RPM_BUILD_ROOT}%{_sbindir}/ping6
+ln -sf ../bin/ping6 ${RPM_BUILD_ROOT}%{_sbindir}
 ln -sf ../bin/tracepath ${RPM_BUILD_ROOT}%{_sbindir}
 ln -sf ../bin/tracepath6 ${RPM_BUILD_ROOT}%{_sbindir}
 
@@ -159,14 +147,14 @@ mv -f RELNOTES.tmp RELNOTES
 %files
 %doc RELNOTES README.bonding
 %{_unitdir}/rdisc.service
-%attr(0755,root,root) %caps(cap_net_raw=p) %{_sbindir}/clockdiff
-%attr(0755,root,root) %caps(cap_net_raw=p) %{_sbindir}/arping
-%attr(0755,root,root) %caps(cap_net_raw=p cap_net_admin=p) %{_bindir}/ping
+%attr(0755,root,root) %caps(cap_net_raw=ep) %{_sbindir}/clockdiff
+%attr(0755,root,root) %caps(cap_net_raw=ep) %{_sbindir}/arping
+%attr(0755,root,root) %caps(cap_net_raw=ep cap_net_admin=ep) %{_bindir}/ping
 %{_sbindir}/ifenslave
 %{_sbindir}/rdisc
+%attr(0755,root,root) %caps(cap_net_raw=ep cap_net_admin=ep) %{_bindir}/ping6
 %{_bindir}/tracepath
 %{_bindir}/tracepath6
-%{_bindir}/ping6
 %{_sbindir}/ping6
 %{_sbindir}/tracepath
 %{_sbindir}/tracepath6
@@ -189,41 +177,6 @@ mv -f RELNOTES.tmp RELNOTES
 %attr(644,root,root) %{_mandir}/man8/ninfod.8.gz
 
 %changelog
-* Mon Sep  5 2016 Jan Synáček <jsynacek@redhat.com> - 20160308-8
-- arping documentation inconsistency (#1351704)
-
-* Mon Aug 29 2016 Jan Synáček <jsynacek@redhat.com> - 20160308-7
-- ping hung when it cannot receive echo reply (#1362463)
-- arping documentation inconsistency (#1351704)
-
-* Fri Jul 29 2016 Jan Synáček <jsynacek@redhat.com> - 20160308-6
-- ping does not use device specified with -I parameter (#1351540)
-
-* Tue Jul 12 2016 Jan Synáček <jsynacek@redhat.com> - 20160308-5
-- add missing /bin/ping6 (#1355674)
-
-* Fri Jun  3 2016 Jan Synáček <jsynacek@redhat.com> - 20160308-4
-- reorder -I option parsing (#1337598)
-
-* Wed May 11 2016 Jan Synáček <jsynacek@redhat.com> - 20160308-3
-- inconsistent ping behaviour and hang with too large packet size (#1172084)
-
-* Tue Mar 29 2016 Jan Synáček <jsynacek@redhat.com> - 20160308-2
-- ping IPv4 addresses by default when given a name (#1317796)
-
-* Mon Mar 14 2016 Jan Synáček <jsynacek@redhat.com> - 20160308-1
-- Update to iputils-s20160308 (#1273336)
-
-* Tue Mar  1 2016 Jan Synáček <jsynacek@redhat.com> - 20150815-1
-- Update to iputils-s20150815 (#1273336)
-
-* Wed Apr 29 2015 Jan Synáček <jsynacek@redhat.com> - 20121221-7
-- ping returns odd results with options inet6 in resolv.conf (#1210331)
-- count of "back" is not correct in tracepath (#1208372)
-
-* Mon Mar 23 2015 Jan Synáček <jsynacek@redhat.com> - 20121221-7
-- ping does not work in dkr images (#1142311)
-
 * Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 20121221-6
 - Mass rebuild 2014-01-24
 

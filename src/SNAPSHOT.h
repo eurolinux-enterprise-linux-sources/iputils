@@ -1,1 +1,1 @@
-#define SNAPSHOT "s20160308"
+static char SNAPSHOT[] = "s20121221";

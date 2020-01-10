@@ -2,16 +2,14 @@
 # This spec file is for _testing_.
 #
 
-%define ssdate 20160308
-%define srcbase iputils%{!?current:-s%{ssdate}}
-
+%define ssdate 20121221
 Summary: The ping program for checking to see if network hosts are alive.
 Name: iputils
-Version: %{ssdate}%{?current:+}
+Version: s%{ssdate}
 Release: 1local
 License: GPLv2+
 Group: System Environment/Daemons
-Source0: %{srcbase}.tar.bz2
+Source0: iputils-s%{ssdate}.tar.bz2
 Prefix: %{_prefix}
 BuildRoot: %{_tmppath}/%{name}-root
 #BuildPrereq: docbook-dtd31-sgml, perl
@@ -24,15 +22,11 @@ specified network host and can tell you if that machine is alive and
 receiving network traffic.
 
 %prep
-%setup -q -n %{srcbase}
+%setup -q %{name}
 
 %build
 make
-(
- cd ninfod
- %configure
- make
-)
+make ninfod
 make man
 make html
 
@@ -95,5 +89,5 @@ rm -rf ${RPM_BUILD_ROOT}
 %changelog
 * Fri Nov 30 2012 YOSHIFUJI Hideaki <yoshfuji@linux-ipv6.org>
   Partically sync with current Fedora's specfile.
-* Fri Feb 23 2001 Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>
+* Sat Feb 23 2001 Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>
   Taken iputils rpm from ASPLinux-7.2 as pattern.

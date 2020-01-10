@@ -17,19 +17,18 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <netdb.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <poll.h>
 #include <arpa/inet.h>
-#include <netinet/in.h>
+#include <sys/ioctl.h>
+#include <sys/poll.h>
+#include <sys/errno.h>
+#include <sys/fcntl.h>
+#include <sys/socket.h>
+#include <sys/signal.h>
 #include <linux/if.h>
 #include <linux/if_arp.h>
+#include <netinet/in.h>
 #include <linux/if_packet.h>
 #include <linux/filter.h>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-
 
 int do_reload = 1;
 
@@ -100,7 +99,7 @@ void load_if(void)
 	}
 
 	ifc.ifc_len = sizeof ibuf;
-	ifc.ifc_buf = (char *)ibuf;
+	ifc.ifc_buf = (caddr_t)ibuf;
 	if (ioctl(fd, SIOCGIFCONF, (char *)&ifc) < 0 ||
 	    ifc.ifc_len < (int)sizeof(struct ifreq)) {
 		syslog(LOG_ERR, "SIOCGIFCONF: %m");
