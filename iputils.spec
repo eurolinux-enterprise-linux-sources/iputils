@@ -3,7 +3,7 @@
 Summary: Network monitoring tools including ping
 Name: iputils
 Version: 20121221
-Release: 6%{?dist}
+Release: 6%{?dist}.1
 # some parts are under the original BSD (ping.c)
 # some are under GPLv2+ (tracepath.c)
 License: BSD and GPLv2+
@@ -20,6 +20,7 @@ Source6: ninfod.service
 Patch0: iputils-20020927-rh.patch
 Patch1: iputils-ifenslave.patch
 Patch2: iputils-20121221-floodlocale.patch
+Patch3: iputils-20121221-caps.patch
 
 BuildRequires: docbook-utils perl-SGMLSpm
 BuildRequires: glibc-kernheaders >= 2.4-8.19
@@ -70,6 +71,7 @@ Queries.
 %patch0 -p1 -b .rh
 %patch1 -p1 -b .addr
 %patch2 -p1 -b .floc
+%patch3 -p1 -b .caps
 
 %build
 %ifarch s390 s390x
@@ -147,12 +149,12 @@ mv -f RELNOTES.tmp RELNOTES
 %files
 %doc RELNOTES README.bonding
 %{_unitdir}/rdisc.service
-%attr(0755,root,root) %caps(cap_net_raw=ep) %{_sbindir}/clockdiff
-%attr(0755,root,root) %caps(cap_net_raw=ep) %{_sbindir}/arping
-%attr(0755,root,root) %caps(cap_net_raw=ep cap_net_admin=ep) %{_bindir}/ping
+%attr(0755,root,root) %caps(cap_net_raw=p) %{_sbindir}/clockdiff
+%attr(0755,root,root) %caps(cap_net_raw=p) %{_sbindir}/arping
+%attr(0755,root,root) %caps(cap_net_raw=p cap_net_admin=p) %{_bindir}/ping
 %{_sbindir}/ifenslave
 %{_sbindir}/rdisc
-%attr(0755,root,root) %caps(cap_net_raw=ep cap_net_admin=ep) %{_bindir}/ping6
+%attr(0755,root,root) %caps(cap_net_raw=p cap_net_admin=p) %{_bindir}/ping6
 %{_bindir}/tracepath
 %{_bindir}/tracepath6
 %{_sbindir}/ping6
@@ -177,6 +179,13 @@ mv -f RELNOTES.tmp RELNOTES
 %attr(644,root,root) %{_mandir}/man8/ninfod.8.gz
 
 %changelog
+* Tue Jun 23 2015 Scientific Linux Auto Patch Process <SCIENTIFIC-LINUX-DEVEL@LISTSERV.FNAL.GOV>
+- Eliminated rpmbuild "bogus date" error due to inconsistent weekday,
+  by assuming the date is correct and changing the weekday.
+
+* Mon Jun  8 2015 Jan Synáček <jsynacek@redhat.com> - 20121221-6.1
+- ping does not work in dkr images (#1228606)
+
 * Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 20121221-6
 - Mass rebuild 2014-01-24
 
